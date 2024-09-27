@@ -1,30 +1,22 @@
+import pandas as pd
 import sqlite3
 
-import pandas as pd
+# Step 1: Create a connection to SQLite database
+conn = sqlite3.connect('test_database.db')
 
-conn = sqlite3.connect('healthcare.db')
+# Step 2: Create a Pandas DataFrame
+df = pd.read_csv('https://data.cdc.gov/resource/it4f-frdc.csv')
+df['sex'].value_counts()
 
-df = pd.read_csv('https://data.cdc.gov/resource/hn4x-zwk7.csv')
+# Step 3: Save the DataFrame to the SQLite database
+df.to_sql('life_expec', conn, if_exists='replace', index=False)
 
-df.to_sql('health_data', conn, if_exists='replace', index=False)
+# Step 4: Query the table to verify the data
+query_1 = 'SELECT area, sex, leb FROM life_expec'
+result_df = pd.read_sql(query_1, conn)
 
+# Step 5: Display the result
+print(result_df)
 
-conn = sqlite3.connect('healthcare.db')
-query = "SELECT * FROM health_data WHERE city = 'New York'"
-filtered_data = pd.read_sql_query(query, conn)
-print(filtered_data)
-conn.close()
-
-
-conn = sqlite3.connect('healthcare.db')
-query = "SELECT condition, AVG(age) FROM health_data GROUP BY condition"
-avg_age_by_condition = pd.read_sql_query(query, conn)
-print(avg_age_by_condition)
-conn.close()
-
-
-conn = sqlite3.connect('healthcare.db')
-query = "SELECT * FROM health_data ORDER BY medical_expenses DESC LIMIT 5"
-top_expenses = pd.read_sql_query(query, conn)
-print(top_expenses)
+# Close the connection
 conn.close()
